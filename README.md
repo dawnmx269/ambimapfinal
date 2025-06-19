@@ -1,12 +1,47 @@
-# React + Vite
+# 애매한 밤하늘 (Ambiguous Night Sky)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+이 프로젝트는 사용자의 감정과 정체성을 별자리로 표현하는 인터랙티브 웹 애플리케이션입니다.
 
-Currently, two official plugins are available:
+## 주요 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🌟 감정과 정체성을 나타내는 별들을 통한 자기 표현
+- 🎨 동적으로 생성되는 개인화된 별자리
+- 💫 감정 단어 조합을 통한 독특한 정체성 표현
+- 📸 자신만의 별자리를 PNG로 저장 가능
 
-## Expanding the ESLint configuration
+## 기술 스택
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React
+- Vite
+- React Router
+- HTML5 Canvas (html2canvas)
+
+## 시작하기
+
+1. 저장소 클론:
+```bash
+git clone [repository-url]
+```
+
+2. 의존성 설치:
+```bash
+npm install
+```
+
+3. 개발 서버 실행:
+```bash
+npm run dev
+```
+
+4. 빌드:
+```bash
+npm run build
+```
+
+## 라이선스
+
+MIT License
+
+## 기여하기
+
+이슈와 풀 리퀘스트를 환영합니다. 주요 변경사항의 경우 먼저 이슈를 열어 논의해주세요.
