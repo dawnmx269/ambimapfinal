@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import 별0 from './assets/별0.png';
-import 별1 from './assets/별1.png';
+import 별0 from '/assets/별0.png';
+import 별1 from '/assets/별1.png';
 import html2canvas from 'html2canvas';
 
 function Home() {
@@ -19,6 +19,23 @@ function Home() {
   const lineProgressRef = useRef([]);
   const constellationRef = useRef(null);
   const [isSavingPNG, setIsSavingPNG] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+
+  // 윈도우 크기 변경 감지
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (location.state?.name) {
@@ -155,6 +172,39 @@ function Home() {
     );
   });
 
+  // SVG 별자리 선 렌더링 함수 수정
+  const renderConstellationLines = () => {
+    if (completedButtons.length <= 1) return null;
+
+    return completedButtons.map((btn, idx) => {
+      if (idx === 0) return null;
+      const prev = completedButtons[idx - 1];
+      const x1 = (prev.pos.left / 100) * windowSize.width;
+      const y1 = (prev.pos.top / 100) * windowSize.height;
+      const x2 = (btn.pos.left / 100) * windowSize.width;
+      const y2 = (btn.pos.top / 100) * windowSize.height;
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const progress = lineProgress[idx - 1] || 0;
+
+      return (
+        <line
+          key={btn.id}
+          x1={x1}
+          y1={y1}
+          x2={x1 + dx * progress}
+          y2={y1 + dy * progress}
+          stroke="yellow"
+          strokeWidth="4"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          opacity="0.85"
+          filter="url(#glow)"
+        />
+      );
+    });
+  };
+
   // PNG 저장 함수
   const handleSavePNG = async () => {
     setIsSavingPNG(true);
@@ -188,9 +238,56 @@ function Home() {
         color: "white",
         fontSize: "1.2rem",
         fontWeight: "500",
-        textShadow: "1px 1px 2px rgba(0,0,0,0.3)"
+        textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
+        zIndex: showConstellation ? 101 : 1
       }}>
         {name}님의 밤하늘
+      </div>
+
+      {/* 초기화 버튼 추가 */}
+      <div style={{
+        position: "absolute",
+        top: "20px",
+        right: "20px",
+        zIndex: showConstellation ? 101 : 1
+      }}>
+        <button
+          onClick={() => {
+            const confirmReset = window.confirm('모든 설정값이 초기화됩니다. 계속하시겠습니까?');
+            if (confirmReset) {
+              // 모든 감정 단어 삭제
+              for (let i = 1; i <= 11; i++) {
+                localStorage.removeItem(`myEmotionWord_${i}`);
+              }
+              // 버튼 위치 삭제
+              localStorage.removeItem('buttonPositions');
+              // 기타 저장된 데이터 삭제
+              localStorage.removeItem('myEmotionWord');
+              // 페이지 새로고침
+              window.location.reload();
+            }
+          }}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            border: 'none',
+            borderRadius: '20px',
+            color: 'white',
+            fontSize: '0.9rem',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'all 0.3s',
+            backdropFilter: 'blur(5px)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+          }}
+        >
+          초기화
+        </button>
       </div>
 
       {buttons.map((button, index) => (
@@ -331,19 +428,18 @@ function Home() {
             overflow: 'hidden',
           }}
         >
-          {/* SVG 별자리 선 (정확한 버튼 중심, 블러, glow) */}
           <svg
             style={{
               position: "absolute",
               top: 0,
               left: 0,
-              width: window.innerWidth,
-              height: window.innerHeight,
+              width: "100%",
+              height: "100%",
               pointerEvents: "none",
               zIndex: 0
             }}
-            width={window.innerWidth}
-            height={window.innerHeight}
+            width={windowSize.width}
+            height={windowSize.height}
           >
             <defs>
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -354,34 +450,7 @@ function Home() {
                 </feMerge>
               </filter>
             </defs>
-            {/* 각 별을 정확한 중심 좌표로 연결 (선만, 자연스러운 애니메이션) */}
-            {completedButtons.length > 1 && completedButtons.map((btn, idx) => {
-              if (idx === 0) return null;
-              const prev = completedButtons[idx - 1];
-              const x1 = (prev.pos.left / 100) * window.innerWidth;
-              const y1 = (prev.pos.top / 100) * window.innerHeight;
-              const x2 = (btn.pos.left / 100) * window.innerWidth;
-              const y2 = (btn.pos.top / 100) * window.innerHeight;
-              const dx = x2 - x1;
-              const dy = y2 - y1;
-              const length = Math.sqrt(dx * dx + dy * dy);
-              const progress = lineProgress[idx - 1] || 0;
-              return (
-                <line
-                  key={btn.id}
-                  x1={x1}
-                  y1={y1}
-                  x2={x1 + dx * progress}
-                  y2={y1 + dy * progress}
-                  stroke="yellow"
-                  strokeWidth="4"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  opacity="0.85"
-                  filter="url(#glow)"
-                />
-              );
-            })}
+            {renderConstellationLines()}
           </svg>
           {/* 모든 별(버튼) 위치 렌더링: 합성어가 있으면 별1, 없으면 별0 */}
           {buttons.map((button, idx) => {
@@ -432,7 +501,12 @@ function Home() {
                 <img
                   src={isCompleted ? 별1 : 별0}
                   alt="별"
-                  style={{ width: 40, height: 40, objectFit: 'contain', filter: isCompleted ? 'drop-shadow(0 0 8px #FFD600)' : 'none' }}
+                  style={{ 
+                    width: Math.min(40, windowSize.width * 0.05), 
+                    height: Math.min(40, windowSize.width * 0.05), 
+                    objectFit: 'contain', 
+                    filter: isCompleted ? 'drop-shadow(0 0 8px #FFD600)' : 'none' 
+                  }}
                 />
                 {/* 합성어 */}
                 {isCompleted && (
